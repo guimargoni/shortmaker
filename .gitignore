@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+bin/
+models/piper/*.onnx
+models/piper/*.onnx.json
+output/*
+!output/.gitkeep
+logs/*
+!logs/.gitkeep

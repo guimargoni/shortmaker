@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.1",
+  "project": {"id": "m3-aot", "source_name": "Attack on Titan — S1E1", "source_language": "pt", "output_language": "pt-BR"},
+  "defaults": {"video": {"preset": "veryfast"}},
+  "shorts": [
+    {
+      "id": "m3-commentary",
+      "editorial": {"content_mode": "commentary", "title": "O começo da mudança", "hook_text": "A segurança dura tão pouco."},
+      "timeline": [
+        {"type": "source_clip", "start": "00:05:42.000", "end": "00:05:48.000", "voiceover": {"enabled": true, "text": "Esse início cria uma sensação de segurança. Observe como a cena prepara a mudança."}},
+        {"type": "source_clip", "start": "00:05:48.000", "end": "00:05:55.000", "source_audio": {"mode": "keep"}},
+        {"type": "source_clip", "start": "00:06:01.000", "end": "00:06:09.000", "voiceover": {"enabled": true, "text": "A mudança de tom faz essa segurança desaparecer. É o contraste que deixa o começo tão marcante."}}
+      ]
+    },
+    {
+      "id": "m3-second",
+      "editorial": {"content_mode": "commentary", "title": "O contraste da cena", "hook_text": "Você percebeu esse contraste?"},
+      "timeline": [
+        {"type": "source_clip", "start": "00:06:01.000", "end": "00:06:09.000", "voiceover": {"enabled": true, "text": "O contraste entre a tranquilidade e o perigo define o impacto dessa sequência."}},
+        {"type": "source_clip", "start": "00:05:42.000", "end": "00:05:48.000", "source_audio": {"mode": "keep"}},
+        {"type": "source_clip", "start": "00:05:48.000", "end": "00:05:55.000", "voiceover": {"enabled": true, "text": "Agora compare com o começo. A montagem muda nossa leitura das mesmas imagens."}}
+      ]
+    }
+  ]
+}

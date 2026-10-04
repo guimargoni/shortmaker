@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "id": "m3-aot",
+    "source_name": "Attack on Titan — S1E1",
+    "source_language": "pt",
+    "output_language": "pt-BR"
+  },
+  "defaults": {
+    "video": {
+      "preset": "veryfast",
+      "reframe": {
+        "mode": "anime_face_track"
+      }
+    },
+    "voice": {
+      "engine": "piper",
+      "voice_id": "pt_BR-faber-medium",
+      "rate": 1.0,
+      "volume": 1.0,
+      "pronunciation_overrides": {
+        "Eren": "Éren",
+        "Mikasa": "Micássa",
+        "Armin": "Ármin"
+      }
+    }
+  },
+  "shorts": [
+    {
+      "id": "m3-2-focus",
+      "editorial": {
+        "content_mode": "commentary",
+        "title": "Personagens em foco",
+        "hook_text": "Quem você está acompanhando?"
+      },
+      "timeline": [
+        {
+          "type": "source_clip",
+          "start": 331.5,
+          "end": 338,
+          "voiceover": {
+            "enabled": true,
+            "text": "Eren confia na proteção das muralhas. Mas essa segurança pode mudar."
+          }
+        },
+        {
+          "type": "source_clip",
+          "start": 321,
+          "end": 325,
+          "source_audio": {
+            "mode": "keep"
+          }
+        },
+        {
+          "type": "source_clip",
+          "start": 289,
+          "end": 294.5,
+          "voiceover": {
+            "enabled": true,
+            "text": "Mikasa percebe que algo está diferente. Observe a reação dela."
+          }
+        }
+      ]
+    }
+  ]
+}

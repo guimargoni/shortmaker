@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shortmaker"
+version = "0.2.0"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2,<3", "pyttsx3>=2.90", "piper-tts==1.8.0", "opencv-python-headless>=4.10,<5"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+transcription = ["faster-whisper>=1"]
+
+[project.scripts]
+shortmaker = "shortmaker.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
