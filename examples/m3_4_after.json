@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "id": "m3-aot",
+    "source_name": "Attack on Titan — S1E1",
+    "source_language": "pt",
+    "output_language": "pt-BR"
+  },
+  "defaults": {
+    "video": {
+      "preset": "veryfast",
+      "reframe": {
+        "mode": "anime_face_track"
+      }
+    },
+    "voice": {
+      "engine": "piper",
+      "voice_id": "pt_BR-faber-medium",
+      "rate": 1.0,
+      "volume": 1.0,
+      "pronunciation_overrides": {
+        "Eren": "Éren",
+        "Mikasa": "Micássa",
+        "Armin": "Ármin"
+      }
+    },
+    "captions": {
+      "style_preset": "premium",
+      "highlight_keywords": true,
+      "highlight_color": "#FFD84D",
+      "keywords": [
+        "Eren",
+        "Mikasa"
+      ]
+    },
+    "branding": {
+      "end_tag": {
+        "enabled": true,
+        "text": "Tô Assistindo Isso",
+        "secondary_text": "Curtiu? Tem mais.",
+        "icon": "thumbs_up",
+        "duration": 1.0,
+        "position": "bottom_center"
+      }
+    }
+  },
+  "shorts": [
+    {
+      "id": "m3-2-focus",
+      "editorial": {
+        "content_mode": "commentary",
+        "title": "Personagens em foco",
+        "hook_text": "Quem você está acompanhando?"
+      },
+      "timeline": [
+        {
+          "type": "source_clip",
+          "start": 331.5,
+          "end": 338,
+          "voiceover": {
+            "enabled": true,
+            "text": "Eren confia na proteção das muralhas. Mas essa segurança pode mudar."
+          },
+          "effects": [
+            {
+              "type": "slow_zoom",
+              "start_at": 0,
+              "end_at": 2,
+              "from_scale": 1,
+              "to_scale": 1.04
+            },
+            {
+              "type": "punch_in",
+              "at": 3.4,
+              "duration": 0.5,
+              "scale": 1.06
+            }
+          ],
+          "trim_policy": {
+            "remove_dead_time": true,
+            "max_removal_ms": 650,
+            "preserve_dialogue": true,
+            "preserve_reaction": true
+          }
+        },
+        {
+          "type": "source_clip",
+          "start": 321,
+          "end": 325,
+          "source_audio": {
+            "mode": "keep"
+          },
+          "effects": [
+            {
+              "type": "text_card",
+              "at": 0.5,
+              "duration": 1.1,
+              "text": "A segurança parecia garantida.",
+              "style": "subtle"
+            }
+          ],
+          "trim_policy": {
+            "remove_dead_time": true,
+            "max_removal_ms": 650,
+            "preserve_dialogue": true,
+            "preserve_reaction": true
+          }
+        },
+        {
+          "type": "source_clip",
+          "start": 289,
+          "end": 294.5,
+          "voiceover": {
+            "enabled": true,
+            "text": "Mikasa percebe que algo está diferente. Observe a reação dela."
+          },
+          "effects": [
+            {
+              "type": "freeze_frame",
+              "at": 2.4,
+              "duration": 0.45,
+              "audio_mode": "continue"
+            }
+          ],
+          "trim_policy": {
+            "remove_dead_time": true,
+            "max_removal_ms": 650,
+            "preserve_dialogue": true,
+            "preserve_reaction": true
+          }
+        }
+      ],
+      "editing": {
+        "pace": "normal",
+        "editorial_quality_warnings": true
+      }
+    }
+  ]
+}

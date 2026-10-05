@@ -1,5 +1,6 @@
 def segment_duration(segment, narration=0):
-    visual = (segment.end - segment.start) / segment.speed
+    from .editing import edited_visual
+    visual = edited_visual(segment) if segment.effects else (segment.end - segment.start) / segment.speed
     total = max(visual, narration + segment.voiceover.start_offset) if narration else visual
     overflow = total - visual
     if overflow > 1.5 + 1e-6:

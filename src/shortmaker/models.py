@@ -1,6 +1,7 @@
 from typing import Annotated, Any, Literal
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator
 from .timecodes import seconds
+from .editing_models import Effect, TrimPolicy
 
 Time = Annotated[float, BeforeValidator(seconds)]
 
@@ -64,6 +65,8 @@ class Reframe(Model):
 
 
 class Segment(Model):
+    effects: list[Effect] = Field(default_factory=list)
+    trim_policy: TrimPolicy = Field(default_factory=TrimPolicy)
     id: str = ""
     type: Literal["source_clip"]
     start: Time
@@ -86,6 +89,7 @@ class Segment(Model):
 
 
 class Short(Model):
+    editing: dict = Field(default_factory=dict)
     id: str = Field(min_length=1)
     enabled: bool = True
     editorial: dict = Field(default_factory=dict)

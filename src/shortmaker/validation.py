@@ -62,10 +62,14 @@ def validate_settings(plan):
         for key, model in SETTINGS.items():
             validate(model, short.model_dump().get(key, {}), f"shorts[{i}].{key}")
         for j, segment in enumerate(short.timeline):
+            from .editing import validate_effects
+            validate_effects(segment, short.editing.get("pace", "normal"))
             segment.captions = validate(Captions, segment.captions, f"shorts[{i}].timeline[{j}].captions")
             for key in ("transition_in", "transition_out"):
                 if getattr(segment, key):
                     setattr(segment, key, validate(Transition, getattr(segment, key), f"shorts[{i}].timeline[{j}].{key}"))
+                    if getattr(segment, key).get("type") == "crossfade" and getattr(segment, key)["duration"] > .25:
+                        raise ValueError(f"shorts[{i}].timeline[{j}].{key}: crossfade máximo 0.25s")
             if segment.voiceover.enabled and segment.voiceover.engine not in {"sapi", "piper"}:
                 raise ValueError(f"shorts[{i}].timeline[{j}].voiceover.engine: use piper ou sapi")
 

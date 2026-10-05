@@ -239,3 +239,19 @@ O ícone é um desenho ASS local. Não adiciona duração nem interrompe áudio.
 Use `examples/m3_3_before.json` e `examples/m3_3_after.json` para comparar.
 Confira a cena final: o rodapé discreto não garante ausência de rostos em toda
 composição. Detalhes e parâmetros em `JSON_CONTRACT.md`.
+
+## M3.4 — edição cinematográfica por JSON
+
+`timeline[].effects` aceita punch_in, slow_zoom, freeze_frame, text_card,
+speed_change, fade e hard_cut_marker. Tudo é opt-in; nenhum efeito é criado
+automaticamente. `editing.pace` define defaults; warnings editoriais são opcionais.
+Crossfade curto usa `transition_out: {"type":"crossfade","duration":0.12}`.
+
+Use `examples/m3_4_before.json` e `examples/m3_4_after.json` para comparar.
+O exemplo usa 1 punch-in, 1 slow zoom, 1 card e 1 freeze curto. Sem crossfade.
+Tempos, limites e regras de áudio estão em `JSON_CONTRACT.md`.
+
+Remoção de pausas é conservadora: por padrão preserva reações e não corta.
+Só bordas pretas com PCM exatamente zero e autorização editorial explícita para
+dispensar a pausa podem ser removidas; fala/cenas/reação não são inferidas por IA.
+Intermediários lossless de efeitos temporais exigem espaço temporário adicional.

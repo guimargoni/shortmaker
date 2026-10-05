@@ -68,3 +68,20 @@ Using one real source video:
 ## PASS definition
 
 The MVP is PASS only if a user can select one episode, paste a JSON containing a multi-clip commentary Short, click Generate, and receive a final vertical video with original narration, captions, source-audio ducking, hook, and multiple cuts **without opening CapCut afterward**.
+
+## M3.4 — validação técnica em 04/10/2026
+
+- [x] 61 testes anteriores + 29 novos: 90 PASS.
+- [x] JSON antigo continua renderizando com o caminho anterior.
+- [x] Punch-in, slow zoom, freeze pós-crop, text card, fade e marcador.
+- [x] Speed change 0.75–1.35; pitch preservado por atempo, FFT 440 Hz validada.
+- [x] Freeze continue/duck/mute; captions continuam independentes.
+- [x] Micro trim limitado a bordas pretas/PCM zero; fallback seguro.
+- [x] Nenhuma remoção de fala/reação no smoke real.
+- [x] Pace/warnings opcionais e crossfade curto testados.
+- [x] Comparação real before/cinematic gerada, 1080×1920 H.264/AAC.
+- [x] Faber, ducking, anime tracking, captions premium e branding preservados.
+- [x] Sem API nova ou feature M4+.
+- [ ] Aprovação humana específica de ritmo/naturalidade dos novos MP4s.
+
+Evidências e limitações: `M3_4_REPORT.md`.

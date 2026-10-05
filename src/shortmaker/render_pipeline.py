@@ -14,6 +14,7 @@ from .tts import synthesize
 from .validation import editorial_warnings
 from .reframe import analyze_anime, crop_filter
 from .branding import add_end_tag
+from .editing import prepare_clip, visual_filters, add_text_cards, quality_warnings, montage_crossfade, video_graph
 
 
 class Pipeline:
@@ -35,6 +36,9 @@ class Pipeline:
         folder = writable_output(folder)
         for warning in editorial_warnings(plan):
             self.emit("validating", 0, warning)
+        for short in plan.shorts:
+            for warning in quality_warnings(short):
+                self.emit("validating", 0, warning)
         self.emit("probing", 0, "Inspecionando vídeo fonte")
         media = probe(source, self.runner)
         enabled = [(i, s) for i, s in enumerate(plan.shorts) if s.enabled]
@@ -56,7 +60,7 @@ class Pipeline:
                     if short.export.get("write_metadata_sidecar", True):
                         destination.with_suffix(".metadata.json").write_text(json.dumps({"schema_version": plan.schema_version,
                             "project": plan.project, "short": short.model_dump(), "publishing": plan.publishing,
-                            "reframe_report": reframe_report}, ensure_ascii=False, indent=2), encoding="utf-8")
+                            "reframe_report": reframe_report, "editing_report": self.editing_report}, ensure_ascii=False, indent=2), encoding="utf-8")
                 self.emit("completed", self.base + self.span, f"Short {position + 1}/{len(enabled)} concluído: {destination.name}")
             except Cancelled:
                 self.emit("cancelled", self.base, "Cancelado; arquivos já concluídos foram preservados")
@@ -71,11 +75,22 @@ class Pipeline:
         fps = media.fps if short.video.get("fps_mode", "source") == "source" else short.video.get("fps", 30)
         files, durations = [], []
         reframe_report = []
+        self.editing_report = []
+        pace = short.editing.get("pace", "normal")
         for i, segment in enumerate(short.timeline):
             self.runner.check()
             pct = self.base + self.span * (.8 * i / len(short.timeline))
             label = f"{short.id} — segmento {i + 1}/{len(short.timeline)}"
             self.emit("preparing_segment", pct, label)
+            effects = segment.effects
+            original_segment = segment
+            clip_source, segment = prepare_clip(source, segment, temp, i, self.runner, self.ffmpeg, media, pace)
+            if effects or original_segment.trim_policy.remove_dead_time:
+                self.editing_report.append({"segment": i, "effects": [e.model_dump() for e in effects],
+                    "source_start": original_segment.start, "source_end": original_segment.end,
+                    "trim_start_seconds": max(0, segment.start-original_segment.start) if clip_source == source else 0,
+                    "trim_end_seconds": max(0, original_segment.end-segment.end) if clip_source == source else 0,
+                    "prepared_visual_duration": (segment.end-segment.start)/segment.speed})
             voice_duration = 0
             wav = temp / f"voice-{i}.wav"
             if segment.voiceover.enabled:
@@ -98,7 +113,7 @@ class Pipeline:
                         raise ValueError(f"timeline[{i}].captions: fonte não contém áudio para transcrever")
                     audio = temp / f"dialogue-{i}.wav"
                     self.runner.run([self.ffmpeg, "-y", "-v", "error", "-ss", segment.start, "-t", segment.end - segment.start,
-                                     "-i", source, "-vn", "-af", tempo_filters(segment.speed), "-ar", 16000, "-ac", 1, audio])
+                                     "-i", clip_source, "-vn", "-af", tempo_filters(segment.speed), "-ar", 16000, "-ac", 1, audio])
                     events = transcribe(audio, temp / f"transcript-{i}.json", captions, plan.project.get("source_language"), self.runner)
                     ass.add(events, "Dialogue", captions)
             if segment.overlay_text:
@@ -107,6 +122,7 @@ class Pipeline:
                 text = overlay.get("text", "") if isinstance(overlay, dict) else overlay
                 start = float(settings.get("start", 0))
                 ass.add([(start, min(duration, float(settings.get("end", duration))), wrap_overlay(text))], "Overlay", settings)
+            add_text_cards(ass, effects, pace)
             ass_file = temp / f"segment-{i}.ass"
             ass.write(ass_file)
             target = temp / f"segment-{i}.mp4"
@@ -124,7 +140,7 @@ class Pipeline:
             visual = (segment.end - segment.start) / segment.speed
             crop = f"crop=1080:1920:(iw-1080)*{x}:(ih-1920)*{y}"
             if mode == "anime_face_track":
-                points, stats = analyze_anime(source, segment, temp, i, self.runner, self.ffmpeg)
+                points, stats = analyze_anime(clip_source, segment, temp, i, self.runner, self.ffmpeg)
                 reframe_report.append({"segment": i, **stats})
                 crop = crop_filter(points)
                 self.emit("preparing_segment", pct, f"Anime: {stats['frames_with_faces']}/{stats['sampled_frames']} amostras com rosto; fallback={stats['fallback']}")
@@ -132,13 +148,17 @@ class Pipeline:
                 if any(k.at > visual for k in reframe.keyframes):
                     raise ValueError(f"timeline[{i}].reframe.keyframes: at excede duração visual ({visual:.3f}s)")
                 crop = crop_filter([(k.at, k.x, k.y) for k in reframe.keyframes])
-            vf = f"setpts=(PTS-STARTPTS)/{segment.speed},scale={width}:{height}:force_original_aspect_ratio=increase,{crop},setsar=1,fps={fps},tpad=stop_mode=clone:stop_duration={overflow},ass={ass_file.name}"
+            vf = f"setpts=(PTS-STARTPTS)/{segment.speed},scale={width}:{height}:force_original_aspect_ratio=increase,{crop},setsar=1,fps={fps}"
+            effect_filters = visual_filters(effects, fps, pace)
+            if effect_filters:
+                vf += "," + effect_filters
+            vf += f",tpad=stop_mode=clone:stop_duration={overflow},ass={ass_file.name}"
             for edge, transition in (("in", segment.transition_in), ("out", segment.transition_out)):
                 transition = transition or short.model_dump().get("transition", {})
                 if transition.get("type") == "fade":
                     fade = min(float(transition.get("duration", .15)), duration / 2)
                     vf += f",fade=t={edge}:st={0 if edge == 'in' else duration-fade}:d={fade}"
-            args = [self.ffmpeg, "-y", "-v", "error", "-ss", segment.start, "-t", segment.end - segment.start, "-i", source]
+            args = [self.ffmpeg, "-y", "-v", "error", "-ss", segment.start, "-t", segment.end - segment.start, "-i", clip_source]
             if media.audio:
                 audio_filter = f"[0:a:0]asetpts=PTS-STARTPTS,{tempo_filters(segment.speed)},{source_volume(segment, voice_duration)},apad,atrim=duration={duration}[src]"
                 next_input = 1
@@ -151,8 +171,8 @@ class Pipeline:
                 audio_filter += f";[{next_input}:a]adelay={round(segment.voiceover.start_offset*1000)}:all=1,apad,atrim=duration={duration}[voice];[src][voice]amix=inputs=2:duration=longest:normalize=0[a]"
             else:
                 audio_filter += ";[src]anull[a]"
-            graph = f"[0:v:0]{vf}[v];{audio_filter}"
-            if mode in {"anime_face_track", "manual_keyframes"}:
+            graph = video_graph(vf, effects, fps, pace) + ";" + audio_filter
+            if mode in {"anime_face_track", "manual_keyframes"} or effects:
                 graph_file = temp / f"graph-{i}.txt"
                 graph_file.write_text(graph, encoding="utf-8")
                 graph_args = ["-/filter_complex", graph_file.name]
@@ -165,9 +185,11 @@ class Pipeline:
         self.emit("concatenating", self.base + self.span * .82, short.id + " — concatenando")
         concat = temp / "concat.txt"
         concat.write_text("\n".join(f"file '{p.name}'" for p in files), encoding="utf-8")
-        self.runner.run([self.ffmpeg, "-y", "-v", "error", "-f", "concat", "-safe", 0, "-i", concat.name,
-                         "-c", "copy", "montage.mp4"], cwd=temp)
-        total = sum(durations)
+        total = montage_crossfade(files, durations, short, temp, self.runner, self.ffmpeg)
+        if total is None:
+            self.runner.run([self.ffmpeg, "-y", "-v", "error", "-f", "concat", "-safe", 0, "-i", concat.name,
+                             "-c", "copy", "montage.mp4"], cwd=temp)
+            total = sum(durations)
         global_ass = AssBuilder()
         if short.hook["enabled"] and short.editorial.get("hook_text"):
             global_ass.add([(0, min(total, short.hook["duration"]), wrap_overlay(short.editorial["hook_text"], 26))], "Hook", short.hook, 76)

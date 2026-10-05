@@ -2,6 +2,7 @@
 from typing import Literal
 from pydantic import Field, field_validator
 from .models import Model, SourceAudio, Reframe, Voiceover
+from .editing_models import Editing
 
 
 class Style(Model):
@@ -86,7 +87,7 @@ class Export(Model):
 
 
 class Transition(Model):
-    type: Literal["cut", "fade"] = "cut"
+    type: Literal["cut", "fade", "crossfade"] = "cut"
     duration: float = Field(default=.15, gt=0, le=2)
 
 
@@ -112,4 +113,4 @@ class Branding(Model):
 
 SETTINGS = {"video": Video, "audio": Audio, "captions": Captions, "hook": Hook,
             "source_label": SourceLabel, "export": Export, "transition": Transition,
-            "transformative_gate": Gate, "voice": Voiceover, "branding": Branding}
+            "transformative_gate": Gate, "voice": Voiceover, "branding": Branding, "editing": Editing}

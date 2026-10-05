@@ -417,3 +417,68 @@ secondary_text limit 40, empty disables the second line. Fade in/out 120/160 ms.
 Small lower strip below default captions; bottom source label is raised to avoid
 overlap. Placement reduces face obstruction but cannot guarantee it for arbitrary
 scenes or custom caption positions; inspect final shot, disable tag when needed.
+
+## M3.4 — cinematic editing (opt-in)
+
+Each `source_clip` accepts `effects` (default empty) and `trim_policy`.
+Only these event types are supported:
+
+| Type | Fields | Behavior |
+|---|---|---|
+| punch_in | at, duration, scale | Smooth pulse toward target scale and back to editorial baseline; no shake |
+| slow_zoom | start_at, end_at, from_scale, to_scale | Smoothstep, holds final scale to segment end |
+| freeze_frame | at, duration, audio_mode | Replaces video during interval with current frame; does not insert time |
+| text_card | at, duration, text, style, background | Small top overlay; editorial / impact / subtle |
+| speed_change | start_at, end_at, speed, audio_mode | Source video/audio retimed, pitch preserved via atempo |
+| fade | at, duration, direction | Video fade in/out only, no audio fade |
+| hard_cut_marker | at | Metadata marker; no visual effect, no new source split |
+
+Times are local seconds. `speed_change` intervals refer to base visual time
+after the existing segment `speed`; changes cannot overlap. All other effect
+times and reframe keyframes refer to the resulting visual timeline after those
+speed changes, before narration overflow. Narration keeps its independent clock;
+its duration still determines captions/ducking and the existing overflow rule.
+Freeze holds source video only; source audio continues/ducks/mutes per audio_mode,
+while separately synthesized narration continues. Default audio_mode is continue;
+duck uses -16 dB for source audio. Speed multiplier must be 0.75–1.35.
+
+Zoom scales: 1–1.25, optional warning above 1.15; recommend 1.04–1.12. Zooms
+cannot overlap in their active intervals. Punch scale is the target absolute
+scale relative to the existing reframe, smoothly returning to any held slow
+zoom baseline. Zoom applies after tracking/crop and before captions/cards, so
+overlay sizes and timing remain stable. Crop remains inside the frame; large
+faces/edge compositions require editorial review and restrained scale values.
+
+Freeze maximum 1.2 s; fade maximum 0.4 s. Text cards have 120-character limit,
+wrap to compact lines, optional local ASS background, no full-screen panel.
+Default card duration 1.2 s; palette uses white or #FFD84D. Placement cannot
+prove absence of faces in all scenes; review editorial timings in the output.
+
+`editing` inherits defaults → Short. `pace` accepts dramatic / normal / fast;
+it never creates effects or automatically splits clips. When punch duration is
+omitted, defaults are 0.65 / 0.50 / 0.40 s. If slow_zoom end_at is omitted,
+duration defaults are 5 / 4 / 3 s, clipped to the visual duration. Explicit
+JSON values win. Default trim caps are 250 / 450 / 650 ms when not explicitly
+specified. `editorial_quality_warnings: true` enables advisory warnings for
+continuous clips >12 s without commentary/change, >3 effects/5 s, >2 freezes,
+zoom >1.15, cards >2 s, and one clip forming >=70% of the Short.
+
+Safe micro trimming is intentionally narrow. Default preserve_dialogue and
+preserve_reaction are true, and remove_dead_time is false. Even when requested,
+preserve_reaction=true means no automatic cut: silence can be an important
+reaction. With explicit preserve_reaction=false, only blank black edge frames
+(all decoded pixels <=2) whose decoded PCM samples are exactly zero can be
+removed, bounded by max_removal_ms (0–650) per edge. Nonzero audio, nonblack
+frames, missing audio, analysis errors, narration, effects or manual keyframes
+fall back to no cut. No internal scene pauses are removed. Removal is recorded
+in metadata editing_report and logs; editorial source timestamps stay original.
+
+`transition_out.type: crossfade` optionally overlaps adjacent clips by up to
+0.25 s (recommended 0.12), less than half of each clip. Video xfade and audio
+acrossfade preserve alignment; total Short duration shrinks by overlap. Final
+clip has no following clip to crossfade. Hard cuts remain the default and legacy
+fade remains compatible. Do not use crossfade across important narration/dialogue.
+
+No-effect JSONs retain the previous render path. Time effects use temporary
+lossless FFV1/PCM intermediates, then the existing tracking/TTS/ASS/final render.
+No download, API, GPU or additional dependency is introduced.

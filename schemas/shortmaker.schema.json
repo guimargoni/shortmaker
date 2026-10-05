@@ -150,6 +150,15 @@
         },
         "captions": {
           "$ref": "#/$defs/captions"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "trim_policy": {
+          "$ref": "#/$defs/trim_policy"
         }
       },
       "additionalProperties": true
@@ -209,6 +218,9 @@
         },
         "branding": {
           "$ref": "#/$defs/branding"
+        },
+        "editing": {
+          "$ref": "#/$defs/editing"
         }
       },
       "additionalProperties": true
@@ -278,6 +290,187 @@
         }
       },
       "additionalProperties": true
+    },
+    "effect": {
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "enum": [
+            "punch_in",
+            "slow_zoom",
+            "freeze_frame",
+            "text_card",
+            "speed_change",
+            "fade",
+            "hard_cut_marker"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "at": {
+          "default": 0,
+          "minimum": 0,
+          "title": "At",
+          "type": "number"
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 10,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration"
+        },
+        "scale": {
+          "default": 1.08,
+          "maximum": 1.25,
+          "minimum": 1,
+          "title": "Scale",
+          "type": "number"
+        },
+        "start_at": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Start At",
+          "type": "number"
+        },
+        "end_at": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End At"
+        },
+        "from_scale": {
+          "default": 1,
+          "maximum": 1.25,
+          "minimum": 1,
+          "title": "From Scale",
+          "type": "number"
+        },
+        "to_scale": {
+          "default": 1.06,
+          "maximum": 1.25,
+          "minimum": 1,
+          "title": "To Scale",
+          "type": "number"
+        },
+        "speed": {
+          "default": 1,
+          "maximum": 1.35,
+          "minimum": 0.75,
+          "title": "Speed",
+          "type": "number"
+        },
+        "audio_mode": {
+          "default": "continue",
+          "enum": [
+            "continue",
+            "mute",
+            "duck"
+          ],
+          "title": "Audio Mode",
+          "type": "string"
+        },
+        "text": {
+          "default": "",
+          "maxLength": 120,
+          "title": "Text",
+          "type": "string"
+        },
+        "style": {
+          "default": "editorial",
+          "enum": [
+            "editorial",
+            "impact",
+            "subtle"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "direction": {
+          "default": "in",
+          "enum": [
+            "in",
+            "out"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "background": {
+          "default": false,
+          "title": "Background",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Effect",
+      "type": "object"
+    },
+    "trim_policy": {
+      "additionalProperties": true,
+      "properties": {
+        "remove_dead_time": {
+          "default": false,
+          "title": "Remove Dead Time",
+          "type": "boolean"
+        },
+        "max_removal_ms": {
+          "default": 650,
+          "maximum": 650,
+          "minimum": 0,
+          "title": "Max Removal Ms",
+          "type": "integer"
+        },
+        "preserve_dialogue": {
+          "default": true,
+          "title": "Preserve Dialogue",
+          "type": "boolean"
+        },
+        "preserve_reaction": {
+          "default": true,
+          "title": "Preserve Reaction",
+          "type": "boolean"
+        }
+      },
+      "title": "TrimPolicy",
+      "type": "object"
+    },
+    "editing": {
+      "additionalProperties": true,
+      "properties": {
+        "pace": {
+          "default": "normal",
+          "enum": [
+            "dramatic",
+            "normal",
+            "fast"
+          ],
+          "title": "Pace",
+          "type": "string"
+        },
+        "editorial_quality_warnings": {
+          "default": false,
+          "title": "Editorial Quality Warnings",
+          "type": "boolean"
+        }
+      },
+      "title": "Editing",
+      "type": "object"
     }
   }
 }

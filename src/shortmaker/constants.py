@@ -1,4 +1,5 @@
 DEFAULTS = {
+    "editing": {"pace": "normal", "editorial_quality_warnings": False},
     "branding": {"end_tag": {"enabled": False}},
     "video": {"width": 1080, "height": 1920, "fps_mode": "source", "preset": "medium", "crf": 20,
               "reframe": {"mode": "center_crop", "strict": False, "zoom": 1.0, "manual_x": None, "manual_y": None}},
